@@ -12,7 +12,7 @@ export default defineConfig(({mode}) => {
       tailwindcss(),
       VitePWA({
         registerType: 'autoUpdate',
-        includeAssets: ['favicon.ico', 'icon.svg'],
+        includeAssets: ['favicon.ico', 'icon.png'],
         manifest: {
           name: '台灣中油油價預測小幫手',
           short_name: '油價小幫手',
@@ -23,9 +23,9 @@ export default defineConfig(({mode}) => {
           start_url: '/',
           icons: [
             {
-              src: 'icon.svg',
-              sizes: '192x192 512x512',
-              type: 'image/svg+xml'
+              src: 'icon.png',
+              sizes: '512x512',
+              type: 'image/png'
             }
           ]
         }
@@ -42,7 +42,7 @@ export default defineConfig(({mode}) => {
     server: {
       // HMR is disabled in AI Studio via DISABLE_HMR env var.
       // Do not modifyâfile watching is disabled to prevent flickering during agent edits.
-      hmr: process.env.DISABLE_HMR !== 'true',
+      hmr: false,
     },
   };
 });

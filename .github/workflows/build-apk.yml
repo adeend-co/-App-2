@@ -35,6 +35,9 @@ jobs:
           VITE_APP_VERSION: v${{ github.run_number }}
         run: npm run build
 
+      - name: Generate assets
+        run: npx @capacitor/assets generate --android
+
       - name: Sync Capacitor Android
         run: npx cap sync android
 

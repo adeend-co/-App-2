@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Droplet, TrendingDown, TrendingUp, Info, Calendar, Newspaper, Download } from "lucide-react";
 import { Capacitor } from "@capacitor/core";
+import { Browser } from "@capacitor/browser";
 
 export default function App() {
   const [prices, setPrices] = useState<any[]>([]);
@@ -92,6 +93,17 @@ export default function App() {
     );
   }
 
+  const handleDownloadUpdate = async (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    if (updateAvailable) {
+      if (Capacitor.isNativePlatform()) {
+        await Browser.open({ url: updateAvailable.url });
+      } else {
+        window.location.href = updateAvailable.url;
+      }
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 p-4 md:p-8 font-sans">
       <div className="max-w-4xl mx-auto space-y-6">
@@ -108,7 +120,8 @@ export default function App() {
             </div>
             <a 
               href={updateAvailable.url}
-              className="bg-white text-blue-600 px-4 py-2 rounded-lg font-bold shadow-sm hover:bg-gray-50 transition-colors whitespace-nowrap text-center w-full sm:w-auto"
+              onClick={handleDownloadUpdate}
+              className="bg-white text-blue-600 px-4 py-2 rounded-lg font-bold shadow-sm hover:bg-gray-50 transition-colors whitespace-nowrap text-center w-full sm:w-auto cursor-pointer"
             >
               立即下載更新
             </a>
