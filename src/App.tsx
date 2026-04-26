@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Droplet, TrendingDown, TrendingUp, Info, Calendar, Newspaper, Download } from "lucide-react";
 import { Capacitor } from "@capacitor/core";
+import { SpeedInsights } from "@vercel/speed-insights/react";
 
 export default function App() {
   const [prices, setPrices] = useState<any[]>([]);
@@ -210,6 +211,7 @@ export default function App() {
            )}
         </section>
       </div>
+      <SpeedInsights />
     </div>
   );
 }
