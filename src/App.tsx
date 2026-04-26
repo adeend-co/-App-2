@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Droplet, TrendingDown, TrendingUp, Info, Calendar, Newspaper } from "lucide-react";
+import { Droplet, TrendingDown, TrendingUp, Info, Calendar, Newspaper, Download } from "lucide-react";
+import { Capacitor } from "@capacitor/core";
 
 export default function App() {
   const [prices, setPrices] = useState<any[]>([]);
@@ -11,14 +12,38 @@ export default function App() {
     date: string;
   } | null>(null);
   const [loading, setLoading] = useState(true);
+  const [updateAvailable, setUpdateAvailable] = useState<{ url: string, version: string } | null>(null);
+
+  // Check for updates
+  useEffect(() => {
+    async function checkUpdate() {
+      try {
+        const currentVersion = import.meta.env.VITE_APP_VERSION;
+        if (!currentVersion || currentVersion === "development") return;
+
+        const res = await fetch("https://api.github.com/repos/adeend-co/-App-2/releases/latest");
+        if (!res.ok) return;
+        const data = await res.json();
+        
+        if (data && data.tag_name && data.tag_name !== currentVersion) {
+            // If the latest tag is different from our current tag, show update
+            const apkAsset = data.assets?.find((a: any) => a.name.endsWith('.apk'));
+            const downloadUrl = apkAsset ? apkAsset.browser_download_url : data.html_url;
+            setUpdateAvailable({ url: downloadUrl, version: data.tag_name });
+        }
+      } catch (err) {
+        console.error("Update check failed", err);
+      }
+    }
+    checkUpdate();
+  }, []);
 
   useEffect(() => {
     async function fetchData() {
       try {
-        // 如果在 Vercel 等靜態網頁環境執行，apiUrl 保持空字串以呼叫同網域下的 /api
-        // 如果是在 Capacitor (手機 APK) 執行，因為本地端沒有 /api 伺服器，需指向 Vercel 上部署的網址
-        const isNative = window.location.protocol === 'file:' || window.location.protocol === 'capacitor:';
-        const defaultApiUrl = isNative ? "https://app-2-chi.vercel.app" : ""; // 更換成您在 Vercel 實際部署完成後的網址
+        // 使用 Capacitor 的 API 精準判斷是否在原生 APP 內執行
+        const isNative = Capacitor.isNativePlatform();
+        const defaultApiUrl = isNative ? "https://app-2-mu-ten.vercel.app" : ""; // 更換成您在 Vercel 實際部署完成後的網址
         const apiUrl = import.meta.env.VITE_API_BASE_URL || defaultApiUrl;
         
         const [newsRes, pricesRes] = await Promise.all([
@@ -69,7 +94,27 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-gray-50 p-4 md:p-8 font-sans">
-      <div className="max-w-4xl mx-auto space-y-8">
+      <div className="max-w-4xl mx-auto space-y-6">
+        
+        {/* 新版 APK 更新提示 */}
+        {updateAvailable && (
+          <div className="bg-blue-600 text-white p-4 rounded-xl shadow-md flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <Download className="w-6 h-6 flex-shrink-0" />
+              <div>
+                <h3 className="font-bold">發現新版本：{updateAvailable.version}</h3>
+                <p className="text-blue-100 text-sm">請更新以獲得更好的體驗與最新功能</p>
+              </div>
+            </div>
+            <a 
+              href={updateAvailable.url}
+              className="bg-white text-blue-600 px-4 py-2 rounded-lg font-bold shadow-sm hover:bg-gray-50 transition-colors whitespace-nowrap text-center w-full sm:w-auto"
+            >
+              立即下載更新
+            </a>
+          </div>
+        )}
+
         <header className="flex items-center gap-3">
           <div className="p-3 bg-blue-600 text-white rounded-xl shadow-sm">
             <Droplet className="w-8 h-8" />
