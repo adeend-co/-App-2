@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { Droplet, TrendingDown, TrendingUp, Info, Calendar, Newspaper, Download } from "lucide-react";
 import { Capacitor } from "@capacitor/core";
-import { SpeedInsights } from "@vercel/speed-insights/react";
 
 export default function App() {
   const [prices, setPrices] = useState<any[]>([]);
@@ -44,7 +43,7 @@ export default function App() {
       try {
         // 使用 Capacitor 的 API 精準判斷是否在原生 APP 內執行
         const isNative = Capacitor.isNativePlatform();
-        const defaultApiUrl = isNative ? "https://app-2-chi.vercel.app" : ""; // 更換成您在 Vercel 實際部署完成後的網址
+        const defaultApiUrl = isNative ? "https://app-2-mu-ten.vercel.app" : ""; // 更換成您在 Vercel 實際部署完成後的網址
         const apiUrl = import.meta.env.VITE_API_BASE_URL || defaultApiUrl;
         
         const [newsRes, pricesRes] = await Promise.all([
@@ -211,7 +210,6 @@ export default function App() {
            )}
         </section>
       </div>
-      <SpeedInsights />
     </div>
   );
 }
