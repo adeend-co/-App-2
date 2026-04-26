@@ -15,7 +15,7 @@ export default function App() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const apiUrl = import.meta.env.VITE_API_BASE_URL || "";
+        const apiUrl = import.meta.env.VITE_API_BASE_URL || (import.meta.env.PROD ? "https://ais-pre-lrnbxh7n2b2tekmh56arew-248830885479.asia-northeast1.run.app" : "");
         const [newsRes, pricesRes] = await Promise.all([
           fetch(`${apiUrl}/api/news-analysis`),
           fetch(`${apiUrl}/api/prices`)
