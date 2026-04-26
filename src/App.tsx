@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { Droplet, TrendingDown, TrendingUp, Info, Calendar, Newspaper, Download } from "lucide-react";
 import { Capacitor } from "@capacitor/core";
 
+import { App as CapacitorApp } from "@capacitor/app";
+
 export default function App() {
   const [prices, setPrices] = useState<any[]>([]);
   const [news, setNews] = useState<any>(null);
@@ -106,14 +108,18 @@ export default function App() {
                 <p className="text-blue-100 text-sm">請更新以獲得更好的體驗與最新功能</p>
               </div>
             </div>
-            <a 
-              href={updateAvailable.url}
-              target="_blank"
-              rel="noopener noreferrer"
+            <button 
+              onClick={async () => {
+                if (Capacitor.isNativePlatform()) {
+                  await CapacitorApp.openUrl({ url: updateAvailable.url });
+                } else {
+                  window.open(updateAvailable.url, "_blank");
+                }
+              }}
               className="bg-white text-blue-600 px-4 py-2 rounded-lg font-bold shadow-sm hover:bg-gray-50 transition-colors whitespace-nowrap text-center w-full sm:w-auto cursor-pointer"
             >
               立即下載更新
-            </a>
+            </button>
           </div>
         )}
 
