@@ -18,7 +18,7 @@ export default function App() {
         // 如果在 Vercel 等靜態網頁環境執行，apiUrl 保持空字串以呼叫同網域下的 /api
         // 如果是在 Capacitor (手機 APK) 執行，因為本地端沒有 /api 伺服器，需指向 Vercel 上部署的網址
         const isNative = window.location.protocol === 'file:' || window.location.protocol === 'capacitor:';
-        const defaultApiUrl = isNative ? "https://app-2-mu-ten.vercel.app" : ""; // 更換成您在 Vercel 實際部署完成後的網址
+        const defaultApiUrl = isNative ? "https://app-2-chi.vercel.app" : ""; // 更換成您在 Vercel 實際部署完成後的網址
         const apiUrl = import.meta.env.VITE_API_BASE_URL || defaultApiUrl;
         
         const [newsRes, pricesRes] = await Promise.all([
