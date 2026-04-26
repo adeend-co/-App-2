@@ -25109,6 +25109,284 @@ var require_express2 = __commonJS({
   }
 });
 
+// node_modules/object-assign/index.js
+var require_object_assign = __commonJS({
+  "node_modules/object-assign/index.js"(exports2, module2) {
+    "use strict";
+    var getOwnPropertySymbols2 = Object.getOwnPropertySymbols;
+    var hasOwnProperty4 = Object.prototype.hasOwnProperty;
+    var propIsEnumerable2 = Object.prototype.propertyIsEnumerable;
+    function toObject2(val2) {
+      if (val2 === null || val2 === void 0) {
+        throw new TypeError("Object.assign cannot be called with null or undefined");
+      }
+      return Object(val2);
+    }
+    function shouldUseNative2() {
+      try {
+        if (!Object.assign) {
+          return false;
+        }
+        var test1 = new String("abc");
+        test1[5] = "de";
+        if (Object.getOwnPropertyNames(test1)[0] === "5") {
+          return false;
+        }
+        var test2 = {};
+        for (var i5 = 0; i5 < 10; i5++) {
+          test2["_" + String.fromCharCode(i5)] = i5;
+        }
+        var order2 = Object.getOwnPropertyNames(test2).map(function(n4) {
+          return test2[n4];
+        });
+        if (order2.join("") !== "0123456789") {
+          return false;
+        }
+        var test3 = {};
+        "abcdefghijklmnopqrst".split("").forEach(function(letter) {
+          test3[letter] = letter;
+        });
+        if (Object.keys(Object.assign({}, test3)).join("") !== "abcdefghijklmnopqrst") {
+          return false;
+        }
+        return true;
+      } catch (err2) {
+        return false;
+      }
+    }
+    module2.exports = shouldUseNative2() ? Object.assign : function(target, source) {
+      var from;
+      var to = toObject2(target);
+      var symbols;
+      for (var s6 = 1; s6 < arguments.length; s6++) {
+        from = Object(arguments[s6]);
+        for (var key in from) {
+          if (hasOwnProperty4.call(from, key)) {
+            to[key] = from[key];
+          }
+        }
+        if (getOwnPropertySymbols2) {
+          symbols = getOwnPropertySymbols2(from);
+          for (var i5 = 0; i5 < symbols.length; i5++) {
+            if (propIsEnumerable2.call(from, symbols[i5])) {
+              to[symbols[i5]] = from[symbols[i5]];
+            }
+          }
+        }
+      }
+      return to;
+    };
+  }
+});
+
+// node_modules/cors/lib/index.js
+var require_lib4 = __commonJS({
+  "node_modules/cors/lib/index.js"(exports2, module2) {
+    (function() {
+      "use strict";
+      var assign = require_object_assign();
+      var vary2 = require_vary();
+      var defaults2 = {
+        origin: "*",
+        methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+        preflightContinue: false,
+        optionsSuccessStatus: 204
+      };
+      function isString4(s6) {
+        return typeof s6 === "string" || s6 instanceof String;
+      }
+      function isOriginAllowed(origin2, allowedOrigin) {
+        if (Array.isArray(allowedOrigin)) {
+          for (var i5 = 0; i5 < allowedOrigin.length; ++i5) {
+            if (isOriginAllowed(origin2, allowedOrigin[i5])) {
+              return true;
+            }
+          }
+          return false;
+        } else if (isString4(allowedOrigin)) {
+          return origin2 === allowedOrigin;
+        } else if (allowedOrigin instanceof RegExp) {
+          return allowedOrigin.test(origin2);
+        } else {
+          return !!allowedOrigin;
+        }
+      }
+      function configureOrigin(options2, req2) {
+        var requestOrigin = req2.headers.origin, headers = [], isAllowed;
+        if (!options2.origin || options2.origin === "*") {
+          headers.push([{
+            key: "Access-Control-Allow-Origin",
+            value: "*"
+          }]);
+        } else if (isString4(options2.origin)) {
+          headers.push([{
+            key: "Access-Control-Allow-Origin",
+            value: options2.origin
+          }]);
+          headers.push([{
+            key: "Vary",
+            value: "Origin"
+          }]);
+        } else {
+          isAllowed = isOriginAllowed(requestOrigin, options2.origin);
+          headers.push([{
+            key: "Access-Control-Allow-Origin",
+            value: isAllowed ? requestOrigin : false
+          }]);
+          headers.push([{
+            key: "Vary",
+            value: "Origin"
+          }]);
+        }
+        return headers;
+      }
+      function configureMethods(options2) {
+        var methods = options2.methods;
+        if (methods.join) {
+          methods = options2.methods.join(",");
+        }
+        return {
+          key: "Access-Control-Allow-Methods",
+          value: methods
+        };
+      }
+      function configureCredentials(options2) {
+        if (options2.credentials === true) {
+          return {
+            key: "Access-Control-Allow-Credentials",
+            value: "true"
+          };
+        }
+        return null;
+      }
+      function configureAllowedHeaders(options2, req2) {
+        var allowedHeaders = options2.allowedHeaders || options2.headers;
+        var headers = [];
+        if (!allowedHeaders) {
+          allowedHeaders = req2.headers["access-control-request-headers"];
+          headers.push([{
+            key: "Vary",
+            value: "Access-Control-Request-Headers"
+          }]);
+        } else if (allowedHeaders.join) {
+          allowedHeaders = allowedHeaders.join(",");
+        }
+        if (allowedHeaders && allowedHeaders.length) {
+          headers.push([{
+            key: "Access-Control-Allow-Headers",
+            value: allowedHeaders
+          }]);
+        }
+        return headers;
+      }
+      function configureExposedHeaders(options2) {
+        var headers = options2.exposedHeaders;
+        if (!headers) {
+          return null;
+        } else if (headers.join) {
+          headers = headers.join(",");
+        }
+        if (headers && headers.length) {
+          return {
+            key: "Access-Control-Expose-Headers",
+            value: headers
+          };
+        }
+        return null;
+      }
+      function configureMaxAge(options2) {
+        var maxAge = (typeof options2.maxAge === "number" || options2.maxAge) && options2.maxAge.toString();
+        if (maxAge && maxAge.length) {
+          return {
+            key: "Access-Control-Max-Age",
+            value: maxAge
+          };
+        }
+        return null;
+      }
+      function applyHeaders(headers, res) {
+        for (var i5 = 0, n4 = headers.length; i5 < n4; i5++) {
+          var header = headers[i5];
+          if (header) {
+            if (Array.isArray(header)) {
+              applyHeaders(header, res);
+            } else if (header.key === "Vary" && header.value) {
+              vary2(res, header.value);
+            } else if (header.value) {
+              res.setHeader(header.key, header.value);
+            }
+          }
+        }
+      }
+      function cors2(options2, req2, res, next2) {
+        var headers = [], method = req2.method && req2.method.toUpperCase && req2.method.toUpperCase();
+        if (method === "OPTIONS") {
+          headers.push(configureOrigin(options2, req2));
+          headers.push(configureCredentials(options2));
+          headers.push(configureMethods(options2));
+          headers.push(configureAllowedHeaders(options2, req2));
+          headers.push(configureMaxAge(options2));
+          headers.push(configureExposedHeaders(options2));
+          applyHeaders(headers, res);
+          if (options2.preflightContinue) {
+            next2();
+          } else {
+            res.statusCode = options2.optionsSuccessStatus;
+            res.setHeader("Content-Length", "0");
+            res.end();
+          }
+        } else {
+          headers.push(configureOrigin(options2, req2));
+          headers.push(configureCredentials(options2));
+          headers.push(configureExposedHeaders(options2));
+          applyHeaders(headers, res);
+          next2();
+        }
+      }
+      function middlewareWrapper(o6) {
+        var optionsCallback = null;
+        if (typeof o6 === "function") {
+          optionsCallback = o6;
+        } else {
+          optionsCallback = function(req2, cb) {
+            cb(null, o6);
+          };
+        }
+        return function corsMiddleware2(req2, res, next2) {
+          optionsCallback(req2, function(err2, options2) {
+            if (err2) {
+              next2(err2);
+            } else {
+              var corsOptions = assign({}, defaults2, options2);
+              var originCallback = null;
+              if (corsOptions.origin && typeof corsOptions.origin === "function") {
+                originCallback = corsOptions.origin;
+              } else if (corsOptions.origin) {
+                originCallback = function(origin2, cb) {
+                  cb(null, corsOptions.origin);
+                };
+              }
+              if (originCallback) {
+                originCallback(req2.headers.origin, function(err22, origin2) {
+                  if (err22 || !origin2) {
+                    next2(err22);
+                  } else {
+                    corsOptions.origin = origin2;
+                    cors2(corsOptions, req2, res, next2);
+                  }
+                });
+              } else {
+                next2();
+              }
+            }
+          });
+        };
+      }
+      module2.exports = middlewareWrapper;
+    })();
+  }
+});
+
 // node_modules/rollup/dist/native.js
 var require_native = __commonJS({
   "node_modules/rollup/dist/native.js"(exports2, module2) {
@@ -30113,7 +30391,7 @@ is not a problem with esbuild. You need to fix your environment instead.
               const keyfile = getFlag(options22, keys, "keyfile", mustBeString);
               const certfile = getFlag(options22, keys, "certfile", mustBeString);
               const fallback = getFlag(options22, keys, "fallback", mustBeString);
-              const cors = getFlag(options22, keys, "cors", mustBeObject);
+              const cors2 = getFlag(options22, keys, "cors", mustBeObject);
               const onRequest = getFlag(options22, keys, "onRequest", mustBeFunction);
               checkForInvalidFlags(options22, keys, `in serve() call`);
               const request2 = {
@@ -30127,10 +30405,10 @@ is not a problem with esbuild. You need to fix your environment instead.
               if (keyfile !== void 0) request2.keyfile = keyfile;
               if (certfile !== void 0) request2.certfile = certfile;
               if (fallback !== void 0) request2.fallback = fallback;
-              if (cors) {
+              if (cors2) {
                 const corsKeys = {};
-                const origin2 = getFlag(cors, corsKeys, "origin", mustBeStringOrArrayOfStrings);
-                checkForInvalidFlags(cors, corsKeys, `on "cors" object`);
+                const origin2 = getFlag(cors2, corsKeys, "origin", mustBeStringOrArrayOfStrings);
+                checkForInvalidFlags(cors2, corsKeys, `on "cors" object`);
                 if (Array.isArray(origin2)) request2.corsOrigin = origin2;
                 else if (origin2 !== void 0) request2.corsOrigin = [origin2];
               }
@@ -33573,6 +33851,115 @@ var init_dist2 = __esm({
   }
 });
 
+// node_modules/has-flag/index.js
+var require_has_flag = __commonJS({
+  "node_modules/has-flag/index.js"(exports2, module2) {
+    "use strict";
+    module2.exports = (flag, argv2) => {
+      argv2 = argv2 || process.argv;
+      const prefix = flag.startsWith("-") ? "" : flag.length === 1 ? "-" : "--";
+      const pos = argv2.indexOf(prefix + flag);
+      const terminatorPos = argv2.indexOf("--");
+      return pos !== -1 && (terminatorPos === -1 ? true : pos < terminatorPos);
+    };
+  }
+});
+
+// node_modules/supports-color/index.js
+var require_supports_color = __commonJS({
+  "node_modules/supports-color/index.js"(exports2, module2) {
+    "use strict";
+    var os2 = require("os");
+    var hasFlag = require_has_flag();
+    var env3 = process.env;
+    var forceColor;
+    if (hasFlag("no-color") || hasFlag("no-colors") || hasFlag("color=false")) {
+      forceColor = false;
+    } else if (hasFlag("color") || hasFlag("colors") || hasFlag("color=true") || hasFlag("color=always")) {
+      forceColor = true;
+    }
+    if ("FORCE_COLOR" in env3) {
+      forceColor = env3.FORCE_COLOR.length === 0 || parseInt(env3.FORCE_COLOR, 10) !== 0;
+    }
+    function translateLevel(level) {
+      if (level === 0) {
+        return false;
+      }
+      return {
+        level,
+        hasBasic: true,
+        has256: level >= 2,
+        has16m: level >= 3
+      };
+    }
+    function supportsColor(stream6) {
+      if (forceColor === false) {
+        return 0;
+      }
+      if (hasFlag("color=16m") || hasFlag("color=full") || hasFlag("color=truecolor")) {
+        return 3;
+      }
+      if (hasFlag("color=256")) {
+        return 2;
+      }
+      if (stream6 && !stream6.isTTY && forceColor !== true) {
+        return 0;
+      }
+      const min2 = forceColor ? 1 : 0;
+      if (process.platform === "win32") {
+        const osRelease = os2.release().split(".");
+        if (Number(process.versions.node.split(".")[0]) >= 8 && Number(osRelease[0]) >= 10 && Number(osRelease[2]) >= 10586) {
+          return Number(osRelease[2]) >= 14931 ? 3 : 2;
+        }
+        return 1;
+      }
+      if ("CI" in env3) {
+        if (["TRAVIS", "CIRCLECI", "APPVEYOR", "GITLAB_CI"].some((sign) => sign in env3) || env3.CI_NAME === "codeship") {
+          return 1;
+        }
+        return min2;
+      }
+      if ("TEAMCITY_VERSION" in env3) {
+        return /^(9\.(0*[1-9]\d*)\.|\d{2,}\.)/.test(env3.TEAMCITY_VERSION) ? 1 : 0;
+      }
+      if (env3.COLORTERM === "truecolor") {
+        return 3;
+      }
+      if ("TERM_PROGRAM" in env3) {
+        const version5 = parseInt((env3.TERM_PROGRAM_VERSION || "").split(".")[0], 10);
+        switch (env3.TERM_PROGRAM) {
+          case "iTerm.app":
+            return version5 >= 3 ? 3 : 2;
+          case "Apple_Terminal":
+            return 2;
+        }
+      }
+      if (/-256(color)?$/i.test(env3.TERM)) {
+        return 2;
+      }
+      if (/^screen|^xterm|^vt100|^vt220|^rxvt|color|ansi|cygwin|linux/i.test(env3.TERM)) {
+        return 1;
+      }
+      if ("COLORTERM" in env3) {
+        return 1;
+      }
+      if (env3.TERM === "dumb") {
+        return min2;
+      }
+      return min2;
+    }
+    function getSupportLevel(stream6) {
+      const level = supportsColor(stream6);
+      return translateLevel(level);
+    }
+    module2.exports = {
+      supportsColor: getSupportLevel,
+      stdout: getSupportLevel(process.stdout),
+      stderr: getSupportLevel(process.stderr)
+    };
+  }
+});
+
 // node_modules/tsx/dist/temporary-directory-CwHp0_NW.mjs
 var import_node_path3, import_node_os, t, s, e;
 var init_temporary_directory_CwHp0_NW = __esm({
@@ -35766,7 +36153,7 @@ is not a problem with esbuild. You need to fix your environment instead.
               const keyfile = getFlag(options22, keys, "keyfile", mustBeString);
               const certfile = getFlag(options22, keys, "certfile", mustBeString);
               const fallback = getFlag(options22, keys, "fallback", mustBeString);
-              const cors = getFlag(options22, keys, "cors", mustBeObject);
+              const cors2 = getFlag(options22, keys, "cors", mustBeObject);
               const onRequest = getFlag(options22, keys, "onRequest", mustBeFunction);
               checkForInvalidFlags(options22, keys, `in serve() call`);
               const request2 = {
@@ -35780,10 +36167,10 @@ is not a problem with esbuild. You need to fix your environment instead.
               if (keyfile !== void 0) request2.keyfile = keyfile;
               if (certfile !== void 0) request2.certfile = certfile;
               if (fallback !== void 0) request2.fallback = fallback;
-              if (cors) {
+              if (cors2) {
                 const corsKeys = {};
-                const origin2 = getFlag(cors, corsKeys, "origin", mustBeStringOrArrayOfStrings);
-                checkForInvalidFlags(cors, corsKeys, `on "cors" object`);
+                const origin2 = getFlag(cors2, corsKeys, "origin", mustBeStringOrArrayOfStrings);
+                checkForInvalidFlags(cors2, corsKeys, `on "cors" object`);
                 if (Array.isArray(origin2)) request2.corsOrigin = origin2;
                 else if (origin2 !== void 0) request2.corsOrigin = [origin2];
               }
@@ -41338,218 +41725,4 @@ var require_jiti = __commonJS({
           return e9.pos !== t7;
         }, he2.regexp_eatExtendedPatternCharacter = function(e9) {
           var t7 = e9.current();
-          return !(-1 === t7 || 36 === t7 || t7 >= 40 && t7 <= 43 || 46 === t7 || 63 === t7 || 91 === t7 || 94 === t7 || 124 === t7) && (e9.advance(), true);
-        }, he2.regexp_groupSpecifier = function(e9) {
-          if (e9.eat(63)) {
-            this.regexp_eatGroupName(e9) || e9.raise("Invalid group");
-            var t7 = this.options.ecmaVersion >= 16, i6 = e9.groupNames[e9.lastStringValue];
-            if (i6) if (t7) for (var s7 = 0, r7 = i6; s7 < r7.length; s7 += 1) {
-              r7[s7].separatedFrom(e9.branchID) || e9.raise("Duplicate capture group name");
-            }
-            else e9.raise("Duplicate capture group name");
-            t7 ? (i6 || (e9.groupNames[e9.lastStringValue] = [])).push(e9.branchID) : e9.groupNames[e9.lastStringValue] = true;
-          }
-        }, he2.regexp_eatGroupName = function(e9) {
-          if (e9.lastStringValue = "", e9.eat(60)) {
-            if (this.regexp_eatRegExpIdentifierName(e9) && e9.eat(62)) return true;
-            e9.raise("Invalid capture group name");
-          }
-          return false;
-        }, he2.regexp_eatRegExpIdentifierName = function(e9) {
-          if (e9.lastStringValue = "", this.regexp_eatRegExpIdentifierStart(e9)) {
-            for (e9.lastStringValue += codePointToString(e9.lastIntValue); this.regexp_eatRegExpIdentifierPart(e9); ) e9.lastStringValue += codePointToString(e9.lastIntValue);
-            return true;
-          }
-          return false;
-        }, he2.regexp_eatRegExpIdentifierStart = function(e9) {
-          var t7 = e9.pos, i6 = this.options.ecmaVersion >= 11, s7 = e9.current(i6);
-          return e9.advance(i6), 92 === s7 && this.regexp_eatRegExpUnicodeEscapeSequence(e9, i6) && (s7 = e9.lastIntValue), (function(e10) {
-            return isIdentifierStart(e10, true) || 36 === e10 || 95 === e10;
-          })(s7) ? (e9.lastIntValue = s7, true) : (e9.pos = t7, false);
-        }, he2.regexp_eatRegExpIdentifierPart = function(e9) {
-          var t7 = e9.pos, i6 = this.options.ecmaVersion >= 11, s7 = e9.current(i6);
-          return e9.advance(i6), 92 === s7 && this.regexp_eatRegExpUnicodeEscapeSequence(e9, i6) && (s7 = e9.lastIntValue), (function(e10) {
-            return isIdentifierChar(e10, true) || 36 === e10 || 95 === e10 || 8204 === e10 || 8205 === e10;
-          })(s7) ? (e9.lastIntValue = s7, true) : (e9.pos = t7, false);
-        }, he2.regexp_eatAtomEscape = function(e9) {
-          return !!(this.regexp_eatBackReference(e9) || this.regexp_eatCharacterClassEscape(e9) || this.regexp_eatCharacterEscape(e9) || e9.switchN && this.regexp_eatKGroupName(e9)) || (e9.switchU && (99 === e9.current() && e9.raise("Invalid unicode escape"), e9.raise("Invalid escape")), false);
-        }, he2.regexp_eatBackReference = function(e9) {
-          var t7 = e9.pos;
-          if (this.regexp_eatDecimalEscape(e9)) {
-            var i6 = e9.lastIntValue;
-            if (e9.switchU) return i6 > e9.maxBackReference && (e9.maxBackReference = i6), true;
-            if (i6 <= e9.numCapturingParens) return true;
-            e9.pos = t7;
-          }
-          return false;
-        }, he2.regexp_eatKGroupName = function(e9) {
-          if (e9.eat(107)) {
-            if (this.regexp_eatGroupName(e9)) return e9.backReferenceNames.push(e9.lastStringValue), true;
-            e9.raise("Invalid named reference");
-          }
-          return false;
-        }, he2.regexp_eatCharacterEscape = function(e9) {
-          return this.regexp_eatControlEscape(e9) || this.regexp_eatCControlLetter(e9) || this.regexp_eatZero(e9) || this.regexp_eatHexEscapeSequence(e9) || this.regexp_eatRegExpUnicodeEscapeSequence(e9, false) || !e9.switchU && this.regexp_eatLegacyOctalEscapeSequence(e9) || this.regexp_eatIdentityEscape(e9);
-        }, he2.regexp_eatCControlLetter = function(e9) {
-          var t7 = e9.pos;
-          if (e9.eat(99)) {
-            if (this.regexp_eatControlLetter(e9)) return true;
-            e9.pos = t7;
-          }
-          return false;
-        }, he2.regexp_eatZero = function(e9) {
-          return 48 === e9.current() && !isDecimalDigit(e9.lookahead()) && (e9.lastIntValue = 0, e9.advance(), true);
-        }, he2.regexp_eatControlEscape = function(e9) {
-          var t7 = e9.current();
-          return 116 === t7 ? (e9.lastIntValue = 9, e9.advance(), true) : 110 === t7 ? (e9.lastIntValue = 10, e9.advance(), true) : 118 === t7 ? (e9.lastIntValue = 11, e9.advance(), true) : 102 === t7 ? (e9.lastIntValue = 12, e9.advance(), true) : 114 === t7 && (e9.lastIntValue = 13, e9.advance(), true);
-        }, he2.regexp_eatControlLetter = function(e9) {
-          var t7 = e9.current();
-          return !!isControlLetter(t7) && (e9.lastIntValue = t7 % 32, e9.advance(), true);
-        }, he2.regexp_eatRegExpUnicodeEscapeSequence = function(e9, t7) {
-          void 0 === t7 && (t7 = false);
-          var i6, s7 = e9.pos, r7 = t7 || e9.switchU;
-          if (e9.eat(117)) {
-            if (this.regexp_eatFixedHexDigits(e9, 4)) {
-              var n5 = e9.lastIntValue;
-              if (r7 && n5 >= 55296 && n5 <= 56319) {
-                var a7 = e9.pos;
-                if (e9.eat(92) && e9.eat(117) && this.regexp_eatFixedHexDigits(e9, 4)) {
-                  var o7 = e9.lastIntValue;
-                  if (o7 >= 56320 && o7 <= 57343) return e9.lastIntValue = 1024 * (n5 - 55296) + (o7 - 56320) + 65536, true;
-                }
-                e9.pos = a7, e9.lastIntValue = n5;
-              }
-              return true;
-            }
-            if (r7 && e9.eat(123) && this.regexp_eatHexDigits(e9) && e9.eat(125) && ((i6 = e9.lastIntValue) >= 0 && i6 <= 1114111)) return true;
-            r7 && e9.raise("Invalid unicode escape"), e9.pos = s7;
-          }
-          return false;
-        }, he2.regexp_eatIdentityEscape = function(e9) {
-          if (e9.switchU) return !!this.regexp_eatSyntaxCharacter(e9) || !!e9.eat(47) && (e9.lastIntValue = 47, true);
-          var t7 = e9.current();
-          return !(99 === t7 || e9.switchN && 107 === t7) && (e9.lastIntValue = t7, e9.advance(), true);
-        }, he2.regexp_eatDecimalEscape = function(e9) {
-          e9.lastIntValue = 0;
-          var t7 = e9.current();
-          if (t7 >= 49 && t7 <= 57) {
-            do {
-              e9.lastIntValue = 10 * e9.lastIntValue + (t7 - 48), e9.advance();
-            } while ((t7 = e9.current()) >= 48 && t7 <= 57);
-            return true;
-          }
-          return false;
-        };
-        function isUnicodePropertyNameCharacter(e9) {
-          return isControlLetter(e9) || 95 === e9;
-        }
-        function isUnicodePropertyValueCharacter(e9) {
-          return isUnicodePropertyNameCharacter(e9) || isDecimalDigit(e9);
-        }
-        function isDecimalDigit(e9) {
-          return e9 >= 48 && e9 <= 57;
-        }
-        function isHexDigit(e9) {
-          return e9 >= 48 && e9 <= 57 || e9 >= 65 && e9 <= 70 || e9 >= 97 && e9 <= 102;
-        }
-        function hexToInt(e9) {
-          return e9 >= 65 && e9 <= 70 ? e9 - 65 + 10 : e9 >= 97 && e9 <= 102 ? e9 - 97 + 10 : e9 - 48;
-        }
-        function isOctalDigit(e9) {
-          return e9 >= 48 && e9 <= 55;
-        }
-        he2.regexp_eatCharacterClassEscape = function(e9) {
-          var t7 = e9.current();
-          if (/* @__PURE__ */ (function(e10) {
-            return 100 === e10 || 68 === e10 || 115 === e10 || 83 === e10 || 119 === e10 || 87 === e10;
-          })(t7)) return e9.lastIntValue = -1, e9.advance(), 1;
-          var i6 = false;
-          if (e9.switchU && this.options.ecmaVersion >= 9 && ((i6 = 80 === t7) || 112 === t7)) {
-            var s7;
-            if (e9.lastIntValue = -1, e9.advance(), e9.eat(123) && (s7 = this.regexp_eatUnicodePropertyValueExpression(e9)) && e9.eat(125)) return i6 && 2 === s7 && e9.raise("Invalid property name"), s7;
-            e9.raise("Invalid property name");
-          }
-          return 0;
-        }, he2.regexp_eatUnicodePropertyValueExpression = function(e9) {
-          var t7 = e9.pos;
-          if (this.regexp_eatUnicodePropertyName(e9) && e9.eat(61)) {
-            var i6 = e9.lastStringValue;
-            if (this.regexp_eatUnicodePropertyValue(e9)) {
-              var s7 = e9.lastStringValue;
-              return this.regexp_validateUnicodePropertyNameAndValue(e9, i6, s7), 1;
-            }
-          }
-          if (e9.pos = t7, this.regexp_eatLoneUnicodePropertyNameOrValue(e9)) {
-            var r7 = e9.lastStringValue;
-            return this.regexp_validateUnicodePropertyNameOrValue(e9, r7);
-          }
-          return 0;
-        }, he2.regexp_validateUnicodePropertyNameAndValue = function(e9, t7, i6) {
-          b3(e9.unicodeProperties.nonBinary, t7) || e9.raise("Invalid property name"), e9.unicodeProperties.nonBinary[t7].test(i6) || e9.raise("Invalid property value");
-        }, he2.regexp_validateUnicodePropertyNameOrValue = function(e9, t7) {
-          return e9.unicodeProperties.binary.test(t7) ? 1 : e9.switchV && e9.unicodeProperties.binaryOfStrings.test(t7) ? 2 : void e9.raise("Invalid property name");
-        }, he2.regexp_eatUnicodePropertyName = function(e9) {
-          var t7 = 0;
-          for (e9.lastStringValue = ""; isUnicodePropertyNameCharacter(t7 = e9.current()); ) e9.lastStringValue += codePointToString(t7), e9.advance();
-          return "" !== e9.lastStringValue;
-        }, he2.regexp_eatUnicodePropertyValue = function(e9) {
-          var t7 = 0;
-          for (e9.lastStringValue = ""; isUnicodePropertyValueCharacter(t7 = e9.current()); ) e9.lastStringValue += codePointToString(t7), e9.advance();
-          return "" !== e9.lastStringValue;
-        }, he2.regexp_eatLoneUnicodePropertyNameOrValue = function(e9) {
-          return this.regexp_eatUnicodePropertyValue(e9);
-        }, he2.regexp_eatCharacterClass = function(e9) {
-          if (e9.eat(91)) {
-            var t7 = e9.eat(94), i6 = this.regexp_classContents(e9);
-            return e9.eat(93) || e9.raise("Unterminated character class"), t7 && 2 === i6 && e9.raise("Negated character class may contain strings"), true;
-          }
-          return false;
-        }, he2.regexp_classContents = function(e9) {
-          return 93 === e9.current() ? 1 : e9.switchV ? this.regexp_classSetExpression(e9) : (this.regexp_nonEmptyClassRanges(e9), 1);
-        }, he2.regexp_nonEmptyClassRanges = function(e9) {
-          for (; this.regexp_eatClassAtom(e9); ) {
-            var t7 = e9.lastIntValue;
-            if (e9.eat(45) && this.regexp_eatClassAtom(e9)) {
-              var i6 = e9.lastIntValue;
-              !e9.switchU || -1 !== t7 && -1 !== i6 || e9.raise("Invalid character class"), -1 !== t7 && -1 !== i6 && t7 > i6 && e9.raise("Range out of order in character class");
-            }
-          }
-        }, he2.regexp_eatClassAtom = function(e9) {
-          var t7 = e9.pos;
-          if (e9.eat(92)) {
-            if (this.regexp_eatClassEscape(e9)) return true;
-            if (e9.switchU) {
-              var i6 = e9.current();
-              (99 === i6 || isOctalDigit(i6)) && e9.raise("Invalid class escape"), e9.raise("Invalid escape");
-            }
-            e9.pos = t7;
-          }
-          var s7 = e9.current();
-          return 93 !== s7 && (e9.lastIntValue = s7, e9.advance(), true);
-        }, he2.regexp_eatClassEscape = function(e9) {
-          var t7 = e9.pos;
-          if (e9.eat(98)) return e9.lastIntValue = 8, true;
-          if (e9.switchU && e9.eat(45)) return e9.lastIntValue = 45, true;
-          if (!e9.switchU && e9.eat(99)) {
-            if (this.regexp_eatClassControlLetter(e9)) return true;
-            e9.pos = t7;
-          }
-          return this.regexp_eatCharacterClassEscape(e9) || this.regexp_eatCharacterEscape(e9);
-        }, he2.regexp_classSetExpression = function(e9) {
-          var t7, i6 = 1;
-          if (this.regexp_eatClassSetRange(e9)) ;
-          else if (t7 = this.regexp_eatClassSetOperand(e9)) {
-            2 === t7 && (i6 = 2);
-            for (var s7 = e9.pos; e9.eatChars([38, 38]); ) 38 !== e9.current() && (t7 = this.regexp_eatClassSetOperand(e9)) ? 2 !== t7 && (i6 = 1) : e9.raise("Invalid character in character class");
-            if (s7 !== e9.pos) return i6;
-            for (; e9.eatChars([45, 45]); ) this.regexp_eatClassSetOperand(e9) || e9.raise("Invalid character in character class");
-            if (s7 !== e9.pos) return i6;
-          } else e9.raise("Invalid character in character class");
-          for (; ; ) if (!this.regexp_eatClassSetRange(e9)) {
-            if (!(t7 = this.regexp_eatClassSetOperand(e9))) return i6;
-            2 === t7 && (i6 = 2);
-          }
-        }, he2.regexp_eatClassSetRange = function(e9) {
-          var t7 = e9.pos;
-          if (this.regexp_eatClassSetCharacter(e9)) {
-            var i6 = e9.lastIntValu
+          return !(-1 === t7 || 36 === t7 || t7 >= 40 && t7 <= 43 || 46 === t7 || 63 === t7 || 91 === t7 || 94 === t7 || 124 === t7) && (e
